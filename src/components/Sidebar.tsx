@@ -27,16 +27,12 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SettingsDialog } from ".";
-import bmcLogo from "../assets/bmc-logo.svg";
-import bmcLogoLight from "../assets/bmc-logo-light.svg";
 import logo from "../assets/logo256.png";
 import { defaultUser } from "../constants/defaultUser";
 import { UserContext } from "../contexts/UserContext";
-import { fetchBMCInfo } from "../services/bmcApi";
 import { fetchGitHubInfo } from "../services/githubApi";
 import { ColorPalette, DialogBtn, pulseAnimation, ring } from "../styles";
 import { showToast, systemInfo, timeAgo } from "../utils";
-import { useTheme } from "@emotion/react";
 
 export const ProfileSidebar = () => {
   const { user, setUser } = useContext(UserContext);
@@ -45,38 +41,17 @@ export const ProfileSidebar = () => {
   const open = Boolean(anchorEl);
   const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState<boolean>(false);
   const [openSettings, setOpenSettings] = useState<boolean>(false);
-
-  const [stars, setStars] = useState<number | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
-  const [issuesCount, setIssuesCount] = useState<number | null>(null);
-
-  const [bmcSupporters, setBmcSupporters] = useState<number | null>(null);
-
-  const theme = useTheme();
   const n = useNavigate();
 
   useEffect(() => {
     const fetchRepoInfo: () => Promise<void> = async () => {
-      const { repoData, branchData } = await fetchGitHubInfo();
-      setStars(repoData.stargazers_count);
+      const { branchData } = await fetchGitHubInfo();
       setLastUpdate(branchData.commit.commit.committer.date);
-      setIssuesCount(repoData.open_issues_count);
     };
-
-    const fetchBMC: () => Promise<void> = async () => {
-      // Fetch data from the Buy Me a Coffee API
-      const { supportersCount } = await fetchBMCInfo();
-      // In case BMC api fails
-      if (supportersCount > 0) {
-        setBmcSupporters(supportersCount);
-      } else {
-        console.error("No BMC supporters found.");
-      }
-    };
-    fetchBMC();
     fetchRepoInfo();
   }, []);
-
+  
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -510,7 +485,6 @@ const LogoText = styled.h2`
     color: ${({ theme }) => theme.primary};
   }
 `;
-
 
 const ProfileOptionsBottom = styled.div<{ isMobile: boolean }>`
   margin-top: auto;
